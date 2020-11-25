@@ -95,8 +95,31 @@ function viewAllEmployees(){
     });
 }
 function employeeDepartmentView(){
+    connection.query("SELECT * FROM department;", (err,res) => {
+        if (err) throw err;
+        console.log(res);
+        const departments = res.map((row) => ({
+            value: row.id,
+            name: row.name,
+        }));
+        inquirer.prompt({
+            type: "list",
+            message: "Which Department do you want to look at?",
+            name: "department",
+            choices: departments,
+        }).then(function(response){
+            console.log(response);
+            const queryRequest= `SELECT employee.id, employee.firstName, employee.lastName,role.title, role.salary FROM employee LEFT JOIN role ON employee.roleID = role.id INNER JOIN department ON role.department_id = department.id WHERE department.ID = ${response.department}`;
+            connection.query(queryRequest, (err,res) => {
+                if (err) throw err;
+                console.table(res);
+                userPrompt();
+            });
+            
+        });
+        
+    });
     
-    userPrompt();
 };
 
 function employeeManagerView(){
@@ -119,9 +142,13 @@ function addDepartment(){
     userPrompt();
 };
 function viewAllRoles(){
-
-    userPrompt();
+    connection.query("SELECT role.title AS 'Title' , role.salary AS 'Salary', department.name AS 'Department' FROM role LEFT JOIN department ON role.department_id = department.id;",(err,res) => {
+        if (err) throw (err);
+        console.table(res);
+        userPrompt();
+    });
 };
+
 
 function viewAllDepartments(){
 

@@ -43,9 +43,28 @@ VALUES  ("John","Doe",1,null), ("Mike","Chan",2,1), ("Ashley", "Rodriguez", 3, n
 
 SELECT * FROM employee;
 
--- View all Employee info
-SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department
+-- VIEW ALL EMPLOYEES
+SELECT employee.id, employee.firstName, employee.lastName, role.title, role.salary, department.name AS department
 FROM employee 
-LEFT JOIN role ON employee.role_id = role_id 
-LEFT JOIN department ON role.department_id = department_id;
+LEFT JOIN role ON employee.roleId = role.Id 
+LEFT JOIN department ON role.department_id = department.Id;
 
+-- VIEW ALL EMPLOYEES BY DEPARTMENT
+SELECT employee.id, employee.firstName, employee.lastName,role.title, role.salary
+FROM employee
+LEFT JOIN role ON employee.roleID = role.id
+INNER JOIN department ON role.department_id = department.id
+WHERE department.ID = 3;
+
+-- -- VIEW ALL EMPLOYEES BY MANAGER
+-- SELECT employee.managerId AS 'Manager ID', manager.firstName, manager.lastName AS 'Manager Name',
+-- employee.id AS 'Employee ID', employee.firstName, employee.lastName 'Employee'
+-- FROM employee employee
+-- INNER JOIN employee manager ON employee.managerId = manager.id
+-- WHERE employee.managerId IS NOT NULL
+-- ORDER BY 'Manager Name';
+
+--VIEW ALL ROLES
+SELECT role.title AS "Title" , role.salary AS "Salary", department.name AS "Department"
+FROM role
+LEFT JOIN department ON role.department_id = department.id;
