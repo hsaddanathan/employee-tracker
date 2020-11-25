@@ -44,7 +44,7 @@ VALUES  ("John","Doe",1,null), ("Mike","Chan",2,1), ("Ashley", "Rodriguez", 3, n
 SELECT * FROM employee;
 
 -- View all Employee info
-SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, name AS Department
+SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS department
 FROM employee 
 LEFT JOIN role ON employee.role_id = role_id 
 LEFT JOIN department ON role.department_id = department_id;

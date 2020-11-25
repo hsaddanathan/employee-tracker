@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var cTable = require("console.table");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -83,4 +84,61 @@ function userPrompt() {
 
       }
     });
+}
+
+function viewAllEmployees(){
+    const queryRequest = "SELECT employee.id, employee.firstName, employee.lastName, role.title, role.salary, department.name AS department FROM employee LEFT JOIN role ON employee.roleId = role.Id LEFT JOIN department ON role.department_id = department.Id;"
+    connection.query(queryRequest,(err,res) => {
+        if (err) throw (err);
+        console.table(res);
+        userPrompt();
+    });
+}
+function employeeDepartmentView(){
+    
+    userPrompt();
+};
+
+function employeeManagerView(){
+
+    userPrompt();
+};
+
+function addEmployee(){
+
+    userPrompt();
+};
+
+function addRole(){
+
+    userPrompt();
+};
+
+function addDepartment(){
+
+    userPrompt();
+};
+function viewAllRoles(){
+
+    userPrompt();
+};
+
+function viewAllDepartments(){
+
+    userPrompt();
+};
+
+function removeEmployee (){
+
+    userPrompt();
+}
+
+function removeRole (){
+
+    userPrompt();
+}
+
+function removeDepartment (){
+
+    userPrompt();
 }
