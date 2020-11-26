@@ -138,8 +138,20 @@ function addRole(){
 };
 
 function addDepartment(){
-
-    userPrompt();
+    inquirer.prompt([
+        {
+            name: "departmentName",
+            type: "input",
+            message: "What is the name of the Department?"
+        },
+    ]).then(function(response){
+        connection.query("INSERT INTO department set ?", {name: response.departmentName}, function(err){
+            if (err) throw err;
+            console.log( `\n**********\n You have created a new deparment called ${response.departmentName} \n**********\n`);
+            userPrompt();
+        });
+    });
+   
 };
 function viewAllRoles(){
     connection.query("SELECT role.title AS 'Title' , role.salary AS 'Salary', department.name AS 'Department' FROM role LEFT JOIN department ON role.department_id = department.id;",(err,res) => {
