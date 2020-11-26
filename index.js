@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var cTable = require("console.table");
+var figlet = require("figlet");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -22,7 +23,16 @@ connection.connect(function (err) {
   userPrompt();
 });
 
+const figletFX = figlet("Employee Manager", function (err, data) {
+  if (err) {
+    console.log("Something went wrong...");
+    console.dir(err);
+    return;
+  }
+  console.log(data);
+});
 function userPrompt() {
+  figletFX;
   inquirer
     .prompt({
       type: "list",
