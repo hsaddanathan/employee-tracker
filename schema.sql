@@ -56,14 +56,6 @@ LEFT JOIN role ON employee.roleID = role.id
 INNER JOIN department ON role.department_id = department.id
 WHERE department.ID = 3;
 
--- -- VIEW ALL EMPLOYEES BY MANAGER
--- SELECT employee.managerId AS 'Manager ID', manager.firstName, manager.lastName AS 'Manager Name',
--- employee.id AS 'Employee ID', employee.firstName, employee.lastName 'Employee'
--- FROM employee employee
--- INNER JOIN employee manager ON employee.managerId = manager.id
--- WHERE employee.managerId IS NOT NULL
--- ORDER BY 'Manager Name';
-
 --VIEW ALL ROLES
 SELECT role.title AS "Title" , role.salary AS "Salary", department.name AS "Department"
 FROM role

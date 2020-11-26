@@ -31,12 +31,11 @@ function userPrompt() {
       choices: [
         "View All Employees",
         "View All Employees by Department",
-        "View All Employees by Manager",
+        "View All Roles",
+        "View All Departments",
         "Add Employee",
         "Add Role",
         "Add Department",
-        "View All Roles",
-        "View All Departments",
         "Remove Employee",
         "Remove Role",
         "Remove Department",
@@ -51,9 +50,6 @@ function userPrompt() {
         case "View All Employees by Department":
           employeeDepartmentView();
           break;
-        case "View All Employees by Manager":
-          employeeManagerView();
-          break;
         case "Add Employee":
           addEmployee();
           break;
@@ -67,121 +63,178 @@ function userPrompt() {
           viewAllRoles();
           break;
         case "View All Departments":
-            viewAllDepartments();
-            break;
+          viewAllDepartments();
+          break;
         case "Remove Employee":
-            removeEmployee();
-            break;
+          removeEmployee();
+          break;
         case "Remove Role":
-            removeRole();
-            break;
+          removeRole();
+          break;
         case "Remove Department":
-            removeDepartment();
-            break;
+          removeDepartment();
+          break;
         case "Exit":
-            connection.end();
-        
-
+          connection.end();
       }
     });
 }
 
-function viewAllEmployees(){
-    const queryRequest = "SELECT employee.id, employee.firstName, employee.lastName, role.title, role.salary, department.name AS department FROM employee LEFT JOIN role ON employee.roleId = role.Id LEFT JOIN department ON role.department_id = department.Id;"
-    connection.query(queryRequest,(err,res) => {
-        if (err) throw (err);
-        console.table(res);
-        userPrompt();
-    });
+function viewAllEmployees() {
+  const queryRequest =
+    "SELECT employee.id AS 'Employee ID', employee.firstName AS 'First Name', employee.lastName AS 'Last Name', role.title AS 'Position', role.salary AS 'Salary', department.name AS 'Department' FROM employee LEFT JOIN role ON employee.roleId = role.Id LEFT JOIN department ON role.department_id = department.Id;";
+  connection.query(queryRequest, (err, res) => {
+    if (err) throw err;
+    console.log(`\n**********\n\n`);
+    console.table(res);
+    console.log(`\n\n**********\n`);
+    userPrompt();
+  });
 }
-function employeeDepartmentView(){
-    connection.query("SELECT * FROM department;", (err,res) => {
+function employeeDepartmentView() {
+  connection.query("SELECT * FROM department;", (err, res) => {
+    if (err) throw err;
+    // console.log(res);
+    const departments = res.map((row) => ({
+      value: row.id,
+      name: row.name,
+    }));
+    inquirer
+      .prompt({
+        type: "list",
+        message: "Which Department do you want to look at?",
+        name: "department",
+        choices: departments,
+      })
+      .then(function (response) {
+        console.log(response);
+        const queryRequest = `SELECT employee.id, employee.firstName, employee.lastName,role.title, role.salary FROM employee LEFT JOIN role ON employee.roleID = role.id INNER JOIN department ON role.department_id = department.id WHERE department.ID = ${response.department}`;
+        connection.query(queryRequest, (err, res) => {
+          if (err) throw err;
+          console.log(`\n**********\n\n`);
+          console.table(res);
+          console.log(`\n\n**********\n`);
+          userPrompt();
+        });
+      });
+  });
+}
+
+function addEmployee() {
+    connection.query("SELECT * FROM role", (err,res) => {
         if (err) throw err;
-        console.log(res);
-        const departments = res.map((row) => ({
-            value: row.id,
-            name: row.name,
-        }));
-        inquirer.prompt({
-            type: "list",
-            message: "Which Department do you want to look at?",
-            name: "department",
-            choices: departments,
-        }).then(function(response){
-            console.log(response);
-            const queryRequest= `SELECT employee.id, employee.firstName, employee.lastName,role.title, role.salary FROM employee LEFT JOIN role ON employee.roleID = role.id INNER JOIN department ON role.department_id = department.id WHERE department.ID = ${response.department}`;
-            connection.query(queryRequest, (err,res) => {
+        inquirer.prompt([
+            {
+                name: "first_Name",
+                type: "input",
+                message: "What is the new employee's first name",
+            },
+            {
+                name: "last_Name",
+                type: "input",
+                message: "What is the new employee's last name",
+            },
+            {
+                name: "role",
+                type: "list",
+                choices: function(){
+                    let roleArray = [];
+                    for (var i=0; i<res.length; i++){
+                        roleArray.push({
+                            name: res[i].title,
+                            value: res[i].id,
+                        });
+                    };
+                    return roleArray;
+                },
+                message: "What role will this employee fill?",   
+            },
+            {
+                name: "managerID",
+                type: "input",
+                message: "If the employee has a manager please type the manager's id number. If not, please press enter",
+            },
+        ]).then(function(res){
+            let newEmployee = {
+                firstName: res.first_Name,
+                lastName: res.last_Name,
+                roleID: res.role,
+            };
+            if(res.managerID){
+                newEmployee.managerID = res.managerID
+            };
+            console.log(res);
+            connection.query("INSERT INTO employee SET ?", newEmployee,function(err){
                 if (err) throw err;
-                console.table(res);
+                console.log(`You have added ${res.first_Name} ${res.last_Name}`);
                 userPrompt();
             });
-            
         });
-        
     });
     
 };
 
-function employeeManagerView(){
-
-    userPrompt();
-};
-
-function addEmployee(){
-
-    userPrompt();
-};
-
-function addRole(){
-
-    userPrompt();
-};
-
-function addDepartment(){
-    inquirer.prompt([
-        {
-            name: "departmentName",
-            type: "input",
-            message: "What is the name of the Department?"
-        },
-    ]).then(function(response){
-        connection.query("INSERT INTO department set ?", {name: response.departmentName}, function(err){
-            if (err) throw err;
-            console.log( `\n**********\n You have created a new deparment called ${response.departmentName} \n**********\n`);
-            userPrompt();
-        });
-    });
-   
-};
-function viewAllRoles(){
-    connection.query("SELECT role.title AS 'Title' , role.salary AS 'Salary', department.name AS 'Department' FROM role LEFT JOIN department ON role.department_id = department.id;",(err,res) => {
-        if (err) throw err;
-        console.table(res);
-        userPrompt();
-    });
-};
-
-
-function viewAllDepartments(){
-    connection.query("SELECT department.name AS 'Name' FROM DEPARTMENT;", (err,res) => {
-        if (err) throw err;
-        console.table(res);
-        userPrompt();
-    });
-    
-};
-
-function removeEmployee (){
-
-    userPrompt();
+function addRole() {
+  userPrompt();
 }
 
-function removeRole (){
-
-    userPrompt();
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        name: "departmentName",
+        type: "input",
+        message: "What is the name of the Department?",
+      },
+    ])
+    .then(function (response) {
+      connection.query(
+        "INSERT INTO department set ?",
+        { name: response.departmentName },
+        function (err) {
+          if (err) throw err;
+          console.log(
+            `\n**********\n You have created a new deparment called ${response.departmentName} \n**********\n`
+          );
+          userPrompt();
+        }
+      );
+    });
+}
+function viewAllRoles() {
+  connection.query(
+    "SELECT role.title AS 'Title' , role.salary AS 'Salary', department.name AS 'Department' FROM role LEFT JOIN department ON role.department_id = department.id;",
+    (err, res) => {
+      if (err) throw err;
+      console.log(`\n**********\n\n`);
+      console.table(res);
+      console.log(`\n\n**********\n`);
+      userPrompt();
+    }
+  );
 }
 
-function removeDepartment (){
+function viewAllDepartments() {
+  connection.query(
+    "SELECT department.name AS 'Name' FROM DEPARTMENT;",
+    (err, res) => {
+      if (err) throw err;
+      console.log(`\n**********\n\n`);
+      console.table(res);
+      console.log(`\n\n**********\n`);
+      userPrompt();
+    }
+  );
+}
 
-    userPrompt();
+function removeEmployee() {
+  userPrompt();
+}
+
+function removeRole() {
+  userPrompt();
+}
+
+function removeDepartment() {
+  userPrompt();
 }
