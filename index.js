@@ -143,7 +143,7 @@ function addDepartment(){
 };
 function viewAllRoles(){
     connection.query("SELECT role.title AS 'Title' , role.salary AS 'Salary', department.name AS 'Department' FROM role LEFT JOIN department ON role.department_id = department.id;",(err,res) => {
-        if (err) throw (err);
+        if (err) throw err;
         console.table(res);
         userPrompt();
     });
@@ -151,8 +151,12 @@ function viewAllRoles(){
 
 
 function viewAllDepartments(){
-
-    userPrompt();
+    connection.query("SELECT department.name AS 'Name' FROM DEPARTMENT;", (err,res) => {
+        if (err) throw err;
+        console.table(res);
+        userPrompt();
+    });
+    
 };
 
 function removeEmployee (){
